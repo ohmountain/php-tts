@@ -106,7 +106,7 @@ wave_pcm_hdr default_wav_hdr =
 	16,
 	{'d', 'a', 't', 'a'},
 	0
-}
+};
 
 
 /* 文本合成 */
@@ -179,6 +179,7 @@ int text_to_speech(const char* src_text, const char* des_path, const char* param
 
   return ret;
 }
+
 
 /*
  * Local variables:

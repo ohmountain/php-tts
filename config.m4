@@ -13,9 +13,9 @@ dnl [  --with-tts             Include tts support])
 
 dnl Otherwise use enable:
 
-dnl PHP_ARG_ENABLE(tts, whether to enable tts support,
-dnl Make sure that the comment is aligned:
-dnl [  --enable-tts           Enable tts support])
+PHP_ARG_ENABLE(tts, whether to enable tts support,
+Make sure that the comment is aligned:
+[  --enable-tts           Enable tts support])
 
 if test "$PHP_TTS" != "no"; then
   dnl Write more examples of tests here...

@@ -83,19 +83,19 @@ PHP_FUNCTION(tts)
     if (MSP_SUCCESS != ret)
         {
             MSPLogout(); //退出登录
-            RETURN_INT(ret);
+            RETURN_LONG(ret);
         }
 
     ret = text_to_speech(text, filename, session_begin_params);
 	if (MSP_SUCCESS != ret)
         {
             MSPLogout(); //退出登录
-            RETURN_INT(ret);
+            RETURN_LONG(ret);
         }
 
 
 	MSPLogout(); //退出登录
-	RETURN_INT(ret);
+	RETURN_LONG(ret);
 }
 /* }}} */
 /* The previous line is meant for vim and emacs, so it can correctly fold and
@@ -178,7 +178,7 @@ PHP_MINFO_FUNCTION(tts)
  * Every user visible function must have an entry in tts_functions[].
  */
 const zend_function_entry tts_functions[] = {
-	PHP_FE(confirm_tts_compiled,	NULL)		/* For testing, remove later. */
+	PHP_FE(tts,	NULL)		/* For testing, remove later. */
 	PHP_FE_END	/* Must be the last line in tts_functions[] */
 };
 /* }}} */
