@@ -51,7 +51,7 @@ PHP_INI_END()
 /* Every user-visible function in PHP should document itself in the source */
 /* {{{ proto string confirm_tts_compiled(string arg)
    Return a string to confirm that the module is compiled in */
-PHP_FUNCTION(confirm_tts_compiled)
+PHP_FUNCTION(tts)
 {
 	char *arg = NULL;
 	size_t arg_len, len;
@@ -61,9 +61,41 @@ PHP_FUNCTION(confirm_tts_compiled)
 		return;
 	}
 
-	strg = strpprintf(0, "Congratulations! You have successfully modified ext/%.78s/config.m4. Module %.78s is now compiled into PHP.", "tts", arg);
+    int         ret                  = MSP_SUCCESS;
+    const char* login_params         = "appid = 59351e35, work_dir = .";//登录参数,appid与msc库绑定,请勿随意改动
+    /*
+     * rdn:           合成音频数字发音方式
+     * volume:        合成音频的音量
+     * pitch:         合成音频的音调
+     * speed:         合成音频对应的语速
+     * voice_name:    合成发音人
+     * sample_rate:   合成音频采样率
+     * text_encoding: 合成文本编码格式
+     *
+     * 详细参数说明请参阅《讯飞语音云MSC--API文档》
+     */
+    const char* session_begin_params = "voice_name = xiaoyan, text_encoding = utf8, sample_rate = 16000, speed = 50, volume = 50, pitch = 50, rdn = 2";
+    const char* filename             = "tts_sample.wav"; //合成的语音文件名称
+    const char* text                 = "你想讲一个故事吗？好啊，那就讲故事啊。从前有座山，山里有个庙，庙里有个老和尚。故事已经讲完"; //合成文本
 
-	RETURN_STR(strg);
+    /* 用户登录 */
+    ret = MSPLogin(NULL, NULL, login_params);//第一个参数是用户名，第二个参数是密码，第三个参数是登录参数，用户名和密码可在http://www.xfyun.cn注册获取
+    if (MSP_SUCCESS != ret)
+        {
+            MSPLogout(); //退出登录
+            RETURN_INT(ret);
+        }
+
+    ret = text_to_speech(text, filename, session_begin_params);
+	if (MSP_SUCCESS != ret)
+        {
+            MSPLogout(); //退出登录
+            RETURN_INT(ret);
+        }
+
+
+	MSPLogout(); //退出登录
+	RETURN_INT(ret);
 }
 /* }}} */
 /* The previous line is meant for vim and emacs, so it can correctly fold and
