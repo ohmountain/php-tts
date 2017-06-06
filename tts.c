@@ -56,22 +56,13 @@ PHP_INI_END()
 
 ZEND_METHOD(tts, __construct)
 {
-    char *username, *password, *appid;
+    char *appid;
 
-    size_t u_len, p_len, a_len;
+    size_t a_len;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss", &username, &u_len, &password, &p_len, &appid, &a_len) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &appid, &a_len) == FAILURE) {
 		return;
 	}
-
-    if (strlen(username) > 0) {
-        zend_update_property_string(tts_ce, getThis(), "username", 8, username TSRMLS_CC);
-    }
-
-
-    if (strlen(password) > 0) {
-        zend_update_property_string(tts_ce, getThis(), "password", 8, password TSRMLS_CC);
-    }
 
     if (strlen(appid) > 0) {
         zend_update_property_string(tts_ce, getThis(), "appid", 5, appid TSRMLS_CC);
@@ -156,25 +147,19 @@ ZEND_METHOD(tts, run)
 {
     zval *rev;
 
-    zval *username;
-    zval *password;
     zval *appid;
 
     zval *text;
     zval *dest;
     zval *voice;
 
-    username = zend_read_property(tts_ce, getThis(), "username", 8, 1, rev);
-    password = zend_read_property(tts_ce, getThis(), "password", 8, 1, rev);
     appid    = zend_read_property(tts_ce, getThis(), "appid", 5, 1, rev);
 
     text  = zend_read_property(tts_ce, getThis(), "text", 4, 1, rev);
     dest  = zend_read_property(tts_ce, getThis(), "dest", 4, 1, rev);
     voice = zend_read_property(tts_ce, getThis(), "voice", 5, 1, rev);
 
-    if (Z_TYPE_P(username) == IS_NULL ||
-        Z_TYPE_P(password) == IS_NULL ||
-        Z_TYPE_P(appid)    == IS_NULL ||
+    if (Z_TYPE_P(appid)    == IS_NULL ||
         Z_TYPE_P(text)     == IS_NULL ||
         Z_TYPE_P(dest)     == IS_NULL ||
         Z_TYPE_P(voice)    == IS_NULL) {
@@ -321,8 +306,6 @@ PHP_MINIT_FUNCTION(tts)
 
     /* 初始化一些值 */
 
-    zend_declare_property_null(tts_ce, "username", 8, ZEND_ACC_PRIVATE TSRMLS_DC);
-    zend_declare_property_null(tts_ce, "password", 8, ZEND_ACC_PRIVATE TSRMLS_DC);
     zend_declare_property_null(tts_ce, "appid", 5, ZEND_ACC_PRIVATE TSRMLS_DC);
     zend_declare_property_null(tts_ce, "text", 4, ZEND_ACC_PRIVATE TSRMLS_DC);
 	zend_declare_property_null(tts_ce, "dest", 4, ZEND_ACC_PRIVATE TSRMLS_DC);
