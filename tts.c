@@ -524,10 +524,10 @@ PHP_MINFO_FUNCTION(tts)
     php_info_print_table_row(2, "Text encoding", "utf8");
     php_info_print_table_row(2, "Sample rate", "16000");
     php_info_print_table_row(2, "Default Speed", "50");
-    php_info_print_table_row(2, "Volume", "50");
-    php_info_print_table_row(2, "Pitch", "50");
-    php_info_print_table_row(2, "Rdn", "2");
-	php_info_print_table_header(2, "Version", "1.0.0");
+    php_info_print_table_row(2, "Default Volume", "50");
+    php_info_print_table_row(2, "Default Pitch", "50");
+    php_info_print_table_row(2, "Default Rdn", "2");
+	php_info_print_table_header(2, "Version", "1.1.0");
 	php_info_print_table_header(2, "Author", "renshan <1005110700@qq.com>");
 	php_info_print_table_end();
 

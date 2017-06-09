@@ -15,10 +15,39 @@ sudo make install
 ```
 
 ## 常量
-1. TTS\_RN\_AUTO_VALUE    0  /* 自动，不确定时按照值发音*/
-2. TTS\_RN\_VALUE         1  /* 按照值发音 */
-3. TTS\_RN\_DIGIT         2  /* 按照串发音 */
-4. TTS\_RN\_AUTO\_DIGIT   3  /* 自动，不确定时按照串发音 */
+| 常量              |              值 | 含义                     |
+| -------------     | :-------------: | -----:                   |
+| TTS_RN_AUTO_VALUE |               0 | 自动，不确定时按照值发音 |
+| TTS_RN_VALUE      |               1 | 按照值发音               |
+| TTS_RN_DIGIT      |               2 | 按照串发音               |
+| TTS_RN_AUTO_DIGIT |               3 | 自动，不确定时按照串发音 |
+
+
+## 方法
+```php
+public function __construct(string $appid): void;
+
+public function setText(string $text): void;
+public function getText(): string;
+
+public function setDest(string $dest): void;
+public function getDest(): string;
+
+public function setVoice(string $voice): void;
+public function getVoice(): string;
+
+public function setSpeed(int $speed):void;
+public function getSpeed(): int;
+
+public function setVolume(int $volume): void;
+public function getVolume(): int;
+
+public function setPitch(int $pitch): void;
+public function getPitch(): int;
+
+public function setRdn(int $rdn): void;
+public function getRdn(): int;
+```
 
 ## 使用
 ```php
@@ -48,7 +77,6 @@ $tts->setRdn(TTS::TTS_RN_VALUE);
 /* 开始转换,注意：这是非常耗时和网络带宽的，请异步操作 */
 $tts->run();
 ```
-
 ## 坑
 1. 这个扩展是基于科大讯飞“文字转语音”的Linux SDK开发的，包含了一个与应用(appid)对应的动态连接库(libmsc.so)，如果使用不同的appid，请在编译前下载appid对应的SKD并把`libmsc.so`替换掉`tts_libs/x64/libmsc.so.bk`。
 2. 因为动态链接库对应appid的唯一性，所以理论上一台主机只能部署一个tts应用。
