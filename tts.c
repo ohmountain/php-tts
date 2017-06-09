@@ -183,15 +183,14 @@ ZEND_METHOD(tts, run)
      * 详细参数说明请参阅《讯飞语音云MSC--API文档》
      */
     /* const char* session_begin_params = "voice_name = xiaoyan, text_encoding = utf8, sample_rate = 16000, speed = 50, volume = 50, pitch = 50, rdn = 2"; */
-    char session_begin_params[Z_STRLEN_P(voice) + 102];
+    char *session_begin_params = safe_emalloc(1, Z_STRLEN_P(voice) + 102, 1);
     sprintf(session_begin_params, "voice_name = %s, text_encoding = utf8, sample_rate = 16000, speed = 50, volume = 50, pitch = 50, rdn = 2", voice->value.str->val);
 
-    char _text[Z_STRLEN_P(text)];//                 = strpprintf(0, "%s", text->value.str->val);
-    //sprintf(_text, "%s", Z_STRVAL_P(text));
+
+    char *_text = safe_emalloc(1, Z_STRLEN_P(text), 1);
     sprintf(_text, "%s", Z_STRVAL_P(text));//登录参数,appid与msc库绑定,请勿随意改动
 
-    /* const char* filename             = "tts_sample.wav"; //合成的语音文件名称 */
-    char filename[Z_STRLEN_P(dest)];
+    char *filename = safe_emalloc(1, Z_STRLEN_P(dest), 1);
     sprintf(filename, "%s", Z_STRVAL_P(dest));
 
     /* 用户登录 */
@@ -211,47 +210,14 @@ ZEND_METHOD(tts, run)
 
 
 	MSPLogout(); //退出登录
+
+    efree(session_begin_params);
+    efree(_text);
+    efree(filename);
+
 	RETURN_LONG(ret);
 }
 
-PHP_FUNCTION(tts)
-{
-    int         ret                  = MSP_SUCCESS;
-    const char* login_params         = "appid = 59351e35, work_dir = .";//登录参数,appid与msc库绑定,请勿随意改动
-    /*
-     * rdn:           合成音频数字发音方式
-     * volume:        合成音频的音量
-     * pitch:         合成音频的音调
-     * speed:         合成音频对应的语速
-     * voice_name:    合成发音人
-     * sample_rate:   合成音频采样率
-     * text_encoding: 合成文本编码格式
-     *
-     * 详细参数说明请参阅《讯飞语音云MSC--API文档》
-     */
-    const char* session_begin_params = "voice_name = xiaoyan, text_encoding = utf8, sample_rate = 16000, speed = 50, volume = 50, pitch = 50, rdn = 2";
-    const char* filename             = "tts_sample.wav"; //合成的语音文件名称
-    const char* text                 = "你想讲一个故事吗？好啊，那就讲故事啊。从前有座山，山里有个庙，庙里有个老和尚。故事已经讲完"; //合成文本
-
-    /* 用户登录 */
-    ret = MSPLogin(NULL, NULL, login_params);//第一个参数是用户名，第二个参数是密码，第三个参数是登录参数，用户名和密码可在http://www.xfyun.cn注册获取
-    if (MSP_SUCCESS != ret)
-        {
-            MSPLogout(); //退出登录
-            RETURN_LONG(ret);
-        }
-
-    ret = text_to_speech(text, filename, session_begin_params);
-	if (MSP_SUCCESS != ret)
-        {
-            MSPLogout(); //退出登录
-            RETURN_LONG(ret);
-        }
-
-
-	MSPLogout(); //退出登录
-	RETURN_LONG(ret);
-}
 /* }}} */
 /* The previous line is meant for vim and emacs, so it can correctly fold and
    unfold functions in source code. See the corresponding marks just before
@@ -279,6 +245,7 @@ const zend_function_entry tts_functions[] = {
 	//PHP_FE(tts,	NULL)		/* For testing, remove later. */
 	//PHP_FE_END	/* Must be the last line in tts_functions[] */
 
+    /* 注册类方法 */
     ZEND_ME(tts, __construct, NULL, ZEND_ACC_PUBLIC)
     ZEND_ME(tts, setTxt, NULL, ZEND_ACC_PUBLIC)
     ZEND_ME(tts, getTxt, NULL, ZEND_ACC_PUBLIC)
@@ -299,6 +266,8 @@ PHP_MINIT_FUNCTION(tts)
 	/* If you have INI entries, uncomment these lines
 	REGISTER_INI_ENTRIES();
 	*/
+
+    /* nginx 或 apache 启动时PHP会初始化这些 */
 
     zend_class_entry ce;
 	INIT_CLASS_ENTRY(ce, "TTS", tts_functions);
