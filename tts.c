@@ -28,7 +28,7 @@
 #include "php_tts.h"
 
 /* If you declare any globals in php_tts.h uncomment this:
-ZEND_DECLARE_MODULE_GLOBALS(tts)
+   ZEND_DECLARE_MODULE_GLOBALS(tts)
 */
 
 /* True global resources - no need for thread safety here */
@@ -39,10 +39,10 @@ zend_class_entry *tts_ce;
 /* {{{ PHP_INI
  */
 /* Remove comments and fill if you need to have entries in php.ini
-PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY("tts.global_value",      "42", PHP_INI_ALL, OnUpdateLong, global_value, zend_tts_globals, tts_globals)
-    STD_PHP_INI_ENTRY("tts.global_string", "foobar", PHP_INI_ALL, OnUpdateString, global_string, zend_tts_globals, tts_globals)
-PHP_INI_END()
+   PHP_INI_BEGIN()
+   STD_PHP_INI_ENTRY("tts.global_value",      "42", PHP_INI_ALL, OnUpdateLong, global_value, zend_tts_globals, tts_globals)
+   STD_PHP_INI_ENTRY("tts.global_string", "foobar", PHP_INI_ALL, OnUpdateString, global_string, zend_tts_globals, tts_globals)
+   PHP_INI_END()
 */
 /* }}} */
 
@@ -61,8 +61,8 @@ ZEND_METHOD(tts, __construct)
     size_t a_len;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &appid, &a_len) == FAILURE) {
-		return;
-	}
+        return;
+    }
 
     if (strlen(appid) > 0) {
         zend_update_property_string(tts_ce, getThis(), "appid", 5, appid TSRMLS_CC);
@@ -92,13 +92,13 @@ ZEND_METHOD(tts, setTxt)
 ZEND_METHOD(tts, getTxt)
 {
     zval *rv;
-	zval *text = zend_read_property(tts_ce, getThis(), "text", 4, 1, rv);
+    zval *text = zend_read_property(tts_ce, getThis(), "text", 4, 1, rv);
 
     if (Z_TYPE_P(text) == IS_NULL) {
         RETURN_NULL();
     }
 
-	RETURN_STR(strpprintf(0, "%s", text->value.str->val));
+    RETURN_STR(strpprintf(0, "%s", text->value.str->val));
 }
 /* }}} */
 
@@ -321,9 +321,10 @@ ZEND_METHOD(tts, run)
     }
 
     int         ret                  = MSP_SUCCESS;
-    /* const char* login_params         = "appid = 59351e35, work_dir = .";//登录参数,appid与msc库绑定,请勿随意改动 *\/ */
-    char login_params[Z_STRLEN_P(appid) + 22];//         = "appid = 59351e35, work_dir = .";//登录参数,appid与msc库绑定,请勿随意改动 */
-    sprintf(login_params, "appid = %s, work_dir = .", Z_STRVAL_P(appid));//登录参数,appid与msc库绑定,请勿随意改动
+    char login_params[Z_STRLEN_P(appid) + 22];
+
+    // "appid = $appid, work_dir = .";//登录参数,appid与msc库绑定,请勿随意改动 */
+    sprintf(login_params, "appid = %s, work_dir = .", Z_STRVAL_P(appid));
 
     /*
      * rdn:           合成音频数字发音方式
@@ -337,19 +338,25 @@ ZEND_METHOD(tts, run)
      * 详细参数说明请参阅《讯飞语音云MSC--API文档》
      */
 
-    /* const char* session_begin_params = "voice_name = xiaoyan, text_encoding = utf8, sample_rate = 16000, speed = 50, volume = 50, pitch = 50, rdn = 2"; */
     char *session_begin_params = safe_emalloc(1, Z_STRLEN_P(voice) + Z_STRLEN_P(speed) + Z_STRLEN_P(volume) + Z_STRLEN_P(pitch) + Z_STRLEN_P(rdn) + 102, 1);
-    sprintf(session_begin_params, "voice_name = %s, text_encoding = utf8, sample_rate = 16000, speed = %s, volume = %s, pitch = %s, rdn = %s",
-            voice->value.str->val, Z_STRVAL_P(speed), Z_STRVAL_P(volume), Z_STRVAL_P(pitch), Z_STRVAL_P(rdn));
+
+    /* const char* session_begin_params = "voice_name = xiaoyan, text_encoding = utf8, sample_rate = 16000, speed = 50, volume = 50, pitch = 50, rdn = 2"; */
+    sprintf(session_begin_params,
+            "voice_name = %s, text_encoding = utf8, sample_rate = 16000, speed = %s, volume = %s, pitch = %s, rdn = %s",
+            voice->value.str->val,
+            Z_STRVAL_P(speed),
+            Z_STRVAL_P(volume),
+            Z_STRVAL_P(pitch),
+            Z_STRVAL_P(rdn));
 
     char *_text = safe_emalloc(1, Z_STRLEN_P(text), 1);
-    sprintf(_text, "%s", Z_STRVAL_P(text));//登录参数,appid与msc库绑定,请勿随意改动
+    sprintf(_text, "%s", Z_STRVAL_P(text));
 
     char *filename = safe_emalloc(1, Z_STRLEN_P(dest), 1);
     sprintf(filename, "%s", Z_STRVAL_P(dest));
 
     /* 用户登录 */
-    ret = MSPLogin(NULL, NULL, login_params);//第一个参数是用户名，第二个参数是密码，第三个参数是登录参数，用户名和密码可在http://www.xfyun.cn注册获取
+    ret = MSPLogin(NULL, NULL, login_params); //第一个参数是用户名，第二个参数是密码，第三个参数是登录参数，用户名和密码可在http://www.xfyun.cn注册获取
     if (MSP_SUCCESS != ret)
         {
             MSPLogout(); //退出登录
@@ -357,20 +364,19 @@ ZEND_METHOD(tts, run)
         }
 
     ret = text_to_speech(_text, filename, session_begin_params);
-	if (MSP_SUCCESS != ret)
+    if (MSP_SUCCESS != ret)
         {
             MSPLogout(); //退出登录
             RETURN_LONG(ret);
         }
 
-
-	MSPLogout(); //退出登录
+    MSPLogout(); //退出登录
 
     efree(session_begin_params);
     efree(_text);
     efree(filename);
 
-	RETURN_LONG(ret);
+    RETURN_LONG(ret);
 }
 
 /* }}} */
@@ -384,21 +390,21 @@ ZEND_METHOD(tts, run)
 /* {{{ php_tts_init_globals
  */
 /* Uncomment this function if you have INI entries
-static void php_tts_init_globals(zend_tts_globals *tts_globals)
-{
-	tts_globals->global_value = 0;
-	tts_globals->global_string = NULL;
-}
+   static void php_tts_init_globals(zend_tts_globals *tts_globals)
+   {
+   tts_globals->global_value = 0;
+   tts_globals->global_string = NULL;
+   }
 */
 /* }}} */
 
- /* {{{ tts_functions[]
-  *
-  * Every user visible function must have an entry in tts_functions[].
-  */
+/* {{{ tts_functions[]
+ *
+ * Every user visible function must have an entry in tts_functions[].
+ */
 const zend_function_entry tts_functions[] = {
-	//PHP_FE(tts,	NULL)		/* For testing, remove later. */
-	//PHP_FE_END	/* Must be the last line in tts_functions[] */
+    //PHP_FE(tts,	NULL)		/* For testing, remove later. */
+    //PHP_FE_END	/* Must be the last line in tts_functions[] */
 
     /* 注册类方法 */
     ZEND_ME(tts, __construct, NULL, ZEND_ACC_PUBLIC)
@@ -426,36 +432,36 @@ const zend_function_entry tts_functions[] = {
  */
 PHP_MINIT_FUNCTION(tts)
 {
-	/* If you have INI entries, uncomment these lines
-	REGISTER_INI_ENTRIES();
-	*/
+    /* If you have INI entries, uncomment these lines
+       REGISTER_INI_ENTRIES();
+    */
 
     /* nginx 或 apache 启动时PHP会初始化这些 */
 
     zend_class_entry ce;
-	INIT_CLASS_ENTRY(ce, "TTS", tts_functions);
-	tts_ce = zend_register_internal_class(&ce TSRMLS_CC);
+    INIT_CLASS_ENTRY(ce, "TTS", tts_functions);
+    tts_ce = zend_register_internal_class(&ce TSRMLS_CC);
 
     /* 初始化一些值 */
 
     zend_declare_property_null(tts_ce, "appid", 5, ZEND_ACC_PRIVATE TSRMLS_DC);
     zend_declare_property_null(tts_ce, "text", 4, ZEND_ACC_PRIVATE TSRMLS_DC);
-	zend_declare_property_null(tts_ce, "dest", 4, ZEND_ACC_PRIVATE TSRMLS_DC);
+    zend_declare_property_null(tts_ce, "dest", 4, ZEND_ACC_PRIVATE TSRMLS_DC);
 
     /* 默认声音是xiaoyan */
-	zend_declare_property_string(tts_ce, "voice", 5, "xiaoyan", ZEND_ACC_PRIVATE TSRMLS_DC);
+    zend_declare_property_string(tts_ce, "voice", 5, "xiaoyan", ZEND_ACC_PRIVATE TSRMLS_DC);
 
     /* 默认语速是50 */
-	zend_declare_property_long(tts_ce, "speed", 5, 50, ZEND_ACC_PRIVATE TSRMLS_DC);
+    zend_declare_property_long(tts_ce, "speed", 5, 50, ZEND_ACC_PRIVATE TSRMLS_DC);
 
     /* 默认音量是50 */
-	zend_declare_property_long(tts_ce, "volume", 7, 50, ZEND_ACC_PRIVATE TSRMLS_DC);
+    zend_declare_property_long(tts_ce, "volume", 7, 50, ZEND_ACC_PRIVATE TSRMLS_DC);
 
     /* 默认音高是50 */
-	zend_declare_property_long(tts_ce, "pitch", 5, 50, ZEND_ACC_PRIVATE TSRMLS_DC);
+    zend_declare_property_long(tts_ce, "pitch", 5, 50, ZEND_ACC_PRIVATE TSRMLS_DC);
 
     /* 默认语音合成方式 */
-	zend_declare_property_long(tts_ce, "rdn", 3, 2, ZEND_ACC_PRIVATE TSRMLS_DC);
+    zend_declare_property_long(tts_ce, "rdn", 3, 2, ZEND_ACC_PRIVATE TSRMLS_DC);
 
     ///
     ///  语音合成设置的常量
@@ -478,7 +484,7 @@ PHP_MINIT_FUNCTION(tts)
     /*自动，不确定时按照串发音 */
     zend_declare_class_constant_long(tts_ce, "TTS_RN_AUTO_DIGIT ", 17, 3 TSRMLS_DC);
 
-	return SUCCESS;
+    return SUCCESS;
 }
 /* }}} */
 
@@ -486,10 +492,10 @@ PHP_MINIT_FUNCTION(tts)
  */
 PHP_MSHUTDOWN_FUNCTION(tts)
 {
-	/* uncomment this line if you have INI entries
-	UNREGISTER_INI_ENTRIES();
-	*/
-	return SUCCESS;
+    /* uncomment this line if you have INI entries
+       UNREGISTER_INI_ENTRIES();
+    */
+    return SUCCESS;
 }
 /* }}} */
 
@@ -499,9 +505,9 @@ PHP_MSHUTDOWN_FUNCTION(tts)
 PHP_RINIT_FUNCTION(tts)
 {
 #if defined(COMPILE_DL_TTS) && defined(ZTS)
-	ZEND_TSRMLS_CACHE_UPDATE();
+    ZEND_TSRMLS_CACHE_UPDATE();
 #endif
-	return SUCCESS;
+    return SUCCESS;
 }
 /* }}} */
 
@@ -510,7 +516,7 @@ PHP_RINIT_FUNCTION(tts)
  */
 PHP_RSHUTDOWN_FUNCTION(tts)
 {
-	return SUCCESS;
+    return SUCCESS;
 }
 /* }}} */
 
@@ -518,38 +524,38 @@ PHP_RSHUTDOWN_FUNCTION(tts)
  */
 PHP_MINFO_FUNCTION(tts)
 {
-	php_info_print_table_start();
-	php_info_print_table_header(2, "TTS support", "enabled");
-    php_info_print_table_row(2, "Default voice name", "xiaoyan");
+    php_info_print_table_start();
+    php_info_print_table_header(2, "TTS support", "enabled");
+    php_info_print_table_row(2, "Default Voice name", "xiaoyan");
     php_info_print_table_row(2, "Text encoding", "utf8");
     php_info_print_table_row(2, "Sample rate", "16000");
     php_info_print_table_row(2, "Default Speed", "50");
     php_info_print_table_row(2, "Default Volume", "50");
     php_info_print_table_row(2, "Default Pitch", "50");
     php_info_print_table_row(2, "Default Rdn", "2");
-	php_info_print_table_header(2, "Version", "1.1.0");
-	php_info_print_table_header(2, "Author", "renshan <1005110700@qq.com>");
-	php_info_print_table_end();
+    php_info_print_table_header(2, "Version", "1.1.0");
+    php_info_print_table_header(2, "Author", "renshan <1005110700@qq.com>");
+    php_info_print_table_end();
 
-	/* Remove comments if you have entries in php.ini
-	DISPLAY_INI_ENTRIES();
-	*/
+    /* Remove comments if you have entries in php.ini
+       DISPLAY_INI_ENTRIES();
+    */
 }
 /* }}} */
 
 /* {{{ tts_module_entry
  */
 zend_module_entry tts_module_entry = {
-	STANDARD_MODULE_HEADER,
-	"tts",
-	tts_functions,
-	PHP_MINIT(tts),
-	PHP_MSHUTDOWN(tts),
-	PHP_RINIT(tts),		/* Replace with NULL if there's nothing to do at request start */
-	PHP_RSHUTDOWN(tts),	/* Replace with NULL if there's nothing to do at request end */
-	PHP_MINFO(tts),
-	PHP_TTS_VERSION,
-	STANDARD_MODULE_PROPERTIES
+    STANDARD_MODULE_HEADER,
+    "tts",
+    tts_functions,
+    PHP_MINIT(tts),
+    PHP_MSHUTDOWN(tts),
+    PHP_RINIT(tts),		/* Replace with NULL if there's nothing to do at request start */
+    PHP_RSHUTDOWN(tts),	/* Replace with NULL if there's nothing to do at request end */
+    PHP_MINFO(tts),
+    PHP_TTS_VERSION,
+    STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
 
