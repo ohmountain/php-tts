@@ -47,6 +47,8 @@ public function getPitch(): int;
 
 public function setRdn(int $rdn): void;
 public function getRdn(): int;
+
+public function run(): int;  //0: success, -1: 参数不足
 ```
 
 ## 使用
