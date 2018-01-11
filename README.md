@@ -8,7 +8,8 @@
 ```shell
 git clone https://github.com/ohmountain/php-tts.git
 cd php-tts/
-sudo sh ./auto_conf.sh
+sudo chmod +x ./auto_conf.sh
+sudo ./auto_conf.sh
 
 sudo make
 sudo make install
