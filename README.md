@@ -1,4 +1,4 @@
-# TTS
+# TTS [ Deprecated ]
 > 基于科大讯飞文字转语音的PHP扩展
 
 ## 平台支持
